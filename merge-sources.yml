@@ -1,0 +1,31 @@
+name: Merge from source repos
+
+on:
+  repository_dispatch:
+    types: [source-updated]
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DISPATCH_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge source repo
+        run: |
+          SOURCE="${{ github.event.client_payload.source_repo }}"
+          REMOTE_NAME=$(basename "$SOURCE")
+
+          git remote add "$REMOTE_NAME" "https://x-access-token:${{ secrets.DISPATCH_TOKEN }}@github.com/$SOURCE.git" || true
+          git fetch "$REMOTE_NAME"
+          git merge "$REMOTE_NAME/main" --allow-unrelated-histories -m "Auto-merge from $SOURCE" --no-edit
+
+      - name: Push
+        run: git push origin main
