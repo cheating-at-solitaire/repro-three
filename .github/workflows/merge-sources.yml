@@ -25,7 +25,7 @@ jobs:
 
           git remote add "$REMOTE_NAME" "https://x-access-token:${{ secrets.DISPATCH_TOKEN }}@github.com/$SOURCE.git" || true
           git fetch "$REMOTE_NAME"
-          git merge "$REMOTE_NAME/main" --allow-unrelated-histories -m "Auto-merge from $SOURCE" --no-edit
+          git merge "$REMOTE_NAME/main" --allow-unrelated-histories -X ours -m "Auto-merge from $SOURCE" --no-edit
 
       - name: Push
         run: git push origin main
